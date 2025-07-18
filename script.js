@@ -1,21 +1,32 @@
+// API Configuration
+const API_BASE_URL = window.location.origin;
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the application
+    initializeApp();
+    
+    // Initialize booking system
+    initializeBookingSystem();
+    
     // Mobile menu toggle
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
 
-    hamburger.addEventListener('click', function() {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
-
-    // Close mobile menu when clicking on a link
-    document.querySelectorAll('.nav-menu a').forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
         });
-    });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+    }
 
     // Navbar scroll effect
     const navbar = document.querySelector('.navbar');
@@ -353,3 +364,315 @@ const mobileMenuCSS = `
 const style = document.createElement('style');
 style.textContent = mobileMenuCSS;
 document.head.appendChild(style);
+
+// Application Initialization
+async function initializeApp() {
+    try {
+        await loadBusinessSettings();
+        await loadServices();
+    } catch (error) {
+        console.error('Failed to initialize app:', error);
+    }
+}
+
+// Load business settings from API
+async function loadBusinessSettings() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/settings`);
+        if (response.ok) {
+            const settings = await response.json();
+            updatePageContent(settings);
+        }
+    } catch (error) {
+        console.error('Failed to load business settings:', error);
+    }
+}
+
+// Update page content with settings
+function updatePageContent(settings) {
+    // Update hero section
+    const heroTitle = document.getElementById('hero-title');
+    const heroSubtitle = document.getElementById('hero-subtitle');
+    
+    if (heroTitle && settings.hero_title) {
+        heroTitle.textContent = settings.hero_title;
+    }
+    
+    if (heroSubtitle && settings.hero_subtitle) {
+        heroSubtitle.textContent = settings.hero_subtitle;
+    }
+    
+    // Update contact information
+    updateElement('contact-phone', settings.contact_phone);
+    updateElement('contact-email', settings.contact_email);
+    updateElement('contact-address', settings.contact_address);
+    updateElement('working-hours', settings.working_hours);
+}
+
+// Helper function to update element content
+function updateElement(id, content) {
+    const element = document.getElementById(id);
+    if (element && content) {
+        element.innerHTML = content;
+    }
+}
+
+// Load services from API
+async function loadServices() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/services`);
+        if (response.ok) {
+            const services = await response.json();
+            displayServices(services);
+            populateServiceSelect(services);
+        }
+    } catch (error) {
+        console.error('Failed to load services:', error);
+    }
+}
+
+// Display services in the booking section
+function displayServices(services) {
+    const servicesList = document.getElementById('services-list');
+    if (!servicesList) return;
+    
+    servicesList.innerHTML = '<h3 style="margin-bottom: 20px; color: #333;">השירותים שלנו</h3>';
+    
+    services.forEach(service => {
+        const serviceCard = document.createElement('div');
+        serviceCard.className = 'service-card';
+        serviceCard.dataset.serviceId = service.id;
+        serviceCard.dataset.serviceName = service.name;
+        
+        serviceCard.innerHTML = `
+            <div class="service-name">${service.name}</div>
+            <div class="service-description">${service.description || ''}</div>
+            <div class="service-details">
+                <span>${service.duration} דקות</span>
+                <span class="service-price">₪${service.price}</span>
+            </div>
+        `;
+        
+        serviceCard.addEventListener('click', () => selectService(serviceCard, service));
+        servicesList.appendChild(serviceCard);
+    });
+}
+
+// Populate service select dropdown
+function populateServiceSelect(services) {
+    const serviceSelect = document.getElementById('booking-service');
+    if (!serviceSelect) return;
+    
+    serviceSelect.innerHTML = '<option value="">בחר שירות</option>';
+    services.forEach(service => {
+        const option = document.createElement('option');
+        option.value = service.name;
+        option.textContent = `${service.name} (₪${service.price})`;
+        serviceSelect.appendChild(option);
+    });
+}
+
+// Select service function
+function selectService(cardElement, service) {
+    // Remove previous selection
+    document.querySelectorAll('.service-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Select current service
+    cardElement.classList.add('selected');
+    
+    // Update form
+    const serviceSelect = document.getElementById('booking-service');
+    if (serviceSelect) {
+        serviceSelect.value = service.name;
+    }
+}
+
+// Initialize booking system
+function initializeBookingSystem() {
+    const bookingForm = document.getElementById('booking-form');
+    const dateInput = document.getElementById('booking-date');
+    
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', handleBookingSubmit);
+    }
+    
+    if (dateInput) {
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+        
+        // Load available time slots when date changes
+        dateInput.addEventListener('change', loadAvailableTimeSlots);
+    }
+}
+
+// Load available time slots for selected date
+async function loadAvailableTimeSlots() {
+    const dateInput = document.getElementById('booking-date');
+    const timeSelect = document.getElementById('booking-time');
+    
+    if (!dateInput.value || !timeSelect) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/available-slots?date=${dateInput.value}`);
+        if (response.ok) {
+            const timeSlots = await response.json();
+            updateTimeSlots(timeSlots);
+        }
+    } catch (error) {
+        console.error('Failed to load time slots:', error);
+    }
+}
+
+// Update time slots dropdown
+function updateTimeSlots(timeSlots) {
+    const timeSelect = document.getElementById('booking-time');
+    timeSelect.innerHTML = '<option value="">בחר שעה</option>';
+    
+    timeSlots.forEach(time => {
+        const option = document.createElement('option');
+        option.value = time;
+        option.textContent = time;
+        timeSelect.appendChild(option);
+    });
+}
+
+// Handle booking form submission
+async function handleBookingSubmit(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const bookingData = Object.fromEntries(formData.entries());
+    
+    // Validate required fields
+    if (!validateBookingData(bookingData)) {
+        return;
+    }
+    
+    // Show loading state
+    showLoadingState(form);
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/appointments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showSuccessMessage(result.message);
+            form.reset();
+            clearServiceSelection();
+        } else {
+            showErrorMessage(result.error || 'שגיאה בקביעת התור');
+        }
+    } catch (error) {
+        console.error('Booking error:', error);
+        showErrorMessage('שגיאה בחיבור לשרת');
+    } finally {
+        hideLoadingState(form);
+    }
+}
+
+// Validate booking data
+function validateBookingData(data) {
+    const required = ['name', 'email', 'phone', 'service', 'appointment_date', 'appointment_time'];
+    
+    for (const field of required) {
+        if (!data[field] || data[field].trim() === '') {
+            showErrorMessage(`אנא מלא את השדה: ${getFieldLabel(field)}`);
+            return false;
+        }
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+        showErrorMessage('כתובת אימייל לא תקינה');
+        return false;
+    }
+    
+    return true;
+}
+
+// Get field label in Hebrew
+function getFieldLabel(field) {
+    const labels = {
+        'name': 'שם מלא',
+        'email': 'אימייל',
+        'phone': 'טלפון',
+        'service': 'שירות',
+        'appointment_date': 'תאריך',
+        'appointment_time': 'שעה'
+    };
+    return labels[field] || field;
+}
+
+// Clear service selection
+function clearServiceSelection() {
+    document.querySelectorAll('.service-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+}
+
+// Show loading state
+function showLoadingState(form) {
+    form.classList.add('loading');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'שולח...';
+    }
+}
+
+// Hide loading state
+function hideLoadingState(form) {
+    form.classList.remove('loading');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'קבע תור';
+    }
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    showMessage(message, 'success');
+}
+
+// Show error message
+function showErrorMessage(message) {
+    showMessage(message, 'error');
+}
+
+// Show message
+function showMessage(message, type) {
+    // Remove existing messages
+    document.querySelectorAll('.success-message, .error-message').forEach(msg => {
+        msg.remove();
+    });
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = type === 'success' ? 'success-message' : 'error-message';
+    messageEl.textContent = message;
+    
+    const bookingForm = document.getElementById('booking-form');
+    if (bookingForm) {
+        bookingForm.insertBefore(messageEl, bookingForm.firstChild);
+        
+        // Remove message after 5 seconds
+        setTimeout(() => {
+            messageEl.remove();
+        }, 5000);
+        
+        // Scroll to message
+        messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}

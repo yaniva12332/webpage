@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פאנל ניהול - מערכת ניהול עסק</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1><i class="fas fa-shield-alt"></i> פאנל ניהול</h1>
+                <p>התחבר כדי לגשת למערכת הניהול</p>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">שם משתמש</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">סיסמה</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-large">התחבר</button>
+                
+                <div class="login-help">
+                    <p>שם משתמש ברירת מחדל: <strong>admin</strong></p>
+                    <p>סיסמה ברירת מחדל: <strong>admin123</strong></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="admin-panel" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="container">
+                <nav class="admin-nav">
+                    <h1><i class="fas fa-cog"></i> פאנל ניהול עסק</h1>
+                    <div class="admin-user">
+                        <span id="admin-username">מנהל</span>
+                        <button class="logout-btn" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> התנתק
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Tabs Navigation -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="showTab('appointments')">
+                    <i class="fas fa-calendar-alt"></i> תורים
+                </button>
+                <button class="tab-btn" onclick="showTab('settings')">
+                    <i class="fas fa-cog"></i> הגדרות אתר
+                </button>
+                <button class="tab-btn" onclick="showTab('services')">
+                    <i class="fas fa-list"></i> שירותים
+                </button>
+                <button class="tab-btn" onclick="showTab('customers')">
+                    <i class="fas fa-users"></i> לקוחות
+                </button>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div id="appointments-tab" class="tab-content active">
+                <div class="tab-header">
+                    <h2><i class="fas fa-calendar-alt"></i> ניהול תורים</h2>
+                    <div class="filters">
+                        <select id="status-filter" onchange="filterAppointments()">
+                            <option value="">כל הסטטוסים</option>
+                            <option value="pending">ממתין לאישור</option>
+                            <option value="confirmed">מאושר</option>
+                            <option value="cancelled">מבוטל</option>
+                        </select>
+                        
+                        <input type="date" id="date-filter" onchange="filterAppointments()">
+                        
+                        <button class="btn btn-secondary" onclick="loadAppointments()">
+                            <i class="fas fa-refresh"></i> רענן
+                        </button>
+                    </div>
+                </div>
+
+                <div class="appointments-container">
+                    <table class="appointments-table" id="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>תאריך</th>
+                                <th>שעה</th>
+                                <th>שם לקוח</th>
+                                <th>שירות</th>
+                                <th>טלפון</th>
+                                <th>סטטוס</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Appointments will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-cog"></i> הגדרות אתר</h2>
+                    <p>ערוך את התוכן המוצג באתר</p>
+                </div>
+
+                <form id="settings-form" class="settings-form">
+                    <div class="settings-section">
+                        <h3>פרטי עסק</h3>
+                        
+                        <div class="form-group">
+                            <label for="business_name">שם העסק</label>
+                            <input type="text" id="business_name" name="business_name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="business_description">תיאור העסק</label>
+                            <input type="text" id="business_description" name="business_description">
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>דף הבית</h3>
+                        
+                        <div class="form-group">
+                            <label for="hero_title">כותרת ראשית</label>
+                            <input type="text" id="hero_title" name="hero_title">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hero_subtitle">תת כותרת</label>
+                            <textarea id="hero_subtitle" name="hero_subtitle" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="about_text">טקסט אודות</label>
+                            <textarea id="about_text" name="about_text" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>פרטי יצירת קשר</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contact_phone">טלפון</label>
+                                <input type="tel" id="contact_phone" name="contact_phone">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="contact_email">אימייל</label>
+                                <input type="email" id="contact_email" name="contact_email">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact_address">כתובת</label>
+                            <input type="text" id="contact_address" name="contact_address">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="working_hours">שעות פעילות</label>
+                            <textarea id="working_hours" name="working_hours" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fas fa-save"></i> שמור שינויים
+                    </button>
+                </form>
+            </div>
+
+            <!-- Services Tab -->
+            <div id="services-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-list"></i> ניהול שירותים</h2>
+                    <button class="btn btn-primary" onclick="showAddServiceForm()">
+                        <i class="fas fa-plus"></i> הוסף שירות
+                    </button>
+                </div>
+
+                <div class="services-container">
+                    <div id="services-list">
+                        <!-- Services will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Add Service Modal -->
+                <div id="add-service-modal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>הוסף שירות חדש</h3>
+                            <button class="modal-close" onclick="hideAddServiceForm()">&times;</button>
+                        </div>
+                        
+                        <form id="add-service-form">
+                            <div class="form-group">
+                                <label for="service-name">שם השירות</label>
+                                <input type="text" id="service-name" name="name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="service-description">תיאור</label>
+                                <textarea id="service-description" name="description" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="service-duration">משך (דקות)</label>
+                                    <input type="number" id="service-duration" name="duration" value="60">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="service-price">מחיר (₪)</label>
+                                    <input type="number" id="service-price" name="price" step="0.01">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">הוסף שירות</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers Tab -->
+            <div id="customers-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2><i class="fas fa-users"></i> רשימת לקוחות</h2>
+                </div>
+
+                <div class="customers-container">
+                    <table class="appointments-table" id="customers-table">
+                        <thead>
+                            <tr>
+                                <th>שם</th>
+                                <th>אימייל</th>
+                                <th>טלפון</th>
+                                <th>מספר תורים</th>
+                                <th>תור אחרון</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Customers will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="message-container"></div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
