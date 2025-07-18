@@ -20,6 +20,7 @@
                 <li><a href="#home">בית</a></li>
                 <li><a href="#about">אודות</a></li>
                 <li><a href="#services">שירותים</a></li>
+                <li><a href="#booking">קביעת תור</a></li>
                 <li><a href="#testimonials">המלצות</a></li>
                 <li><a href="#contact">יצירת קשר</a></li>
             </ul>
@@ -34,10 +35,10 @@
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-content">
-            <h1 class="hero-title">הפוך את החלום שלך למציאות</h1>
-            <p class="hero-subtitle">אימון אישי מותאם אישית שיעזור לך להגיע ליעדים שלך</p>
+            <h1 class="hero-title" id="hero-title">הפוך את החלום שלך למציאות</h1>
+            <p class="hero-subtitle" id="hero-subtitle">אימון אישי מותאם אישית שיעזור לך להגיע ליעדים שלך</p>
             <div class="hero-buttons">
-                <a href="#contact" class="btn btn-primary">התחל עכשיו</a>
+                <a href="#booking" class="btn btn-primary">קבע תור עכשיו</a>
                 <a href="#about" class="btn btn-secondary">למד עוד</a>
             </div>
         </div>
@@ -234,6 +235,70 @@
                             <span>מורה</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="booking">
+        <div class="container">
+            <div class="section-header">
+                <h2>קביעת תור</h2>
+                <p>בחר את השירות המועדף עליך וקבע תור בקלות</p>
+            </div>
+            
+            <div class="booking-container">
+                <div class="services-list" id="services-list">
+                    <!-- Services will be loaded dynamically -->
+                </div>
+                
+                <div class="booking-form-container">
+                    <form id="booking-form" class="booking-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="booking-name">שם מלא</label>
+                                <input type="text" id="booking-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-email">אימייל</label>
+                                <input type="email" id="booking-email" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="booking-phone">טלפון</label>
+                                <input type="tel" id="booking-phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-service">שירות</label>
+                                <select id="booking-service" name="service" required>
+                                    <option value="">בחר שירות</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="booking-date">תאריך</label>
+                                <input type="date" id="booking-date" name="appointment_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-time">שעה</label>
+                                <select id="booking-time" name="appointment_time" required>
+                                    <option value="">בחר שעה</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="booking-message">הערות (אופציונלי)</label>
+                            <textarea id="booking-message" name="message" rows="3" placeholder="ספר לנו על הצרכים שלך או שאלות שיש לך"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-large">קבע תור</button>
+                    </form>
                 </div>
             </div>
         </div>
